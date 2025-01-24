@@ -36,10 +36,8 @@ Authors:
 package com.onesignal.rnonesignalandroid;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.os.Bundle;
 import android.util.Log;
-import com.facebook.react.bridge.Callback;
+
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -55,10 +53,8 @@ import com.onesignal.Continue;
 import com.onesignal.OneSignal;
 import com.onesignal.debug.LogLevel;
 import com.onesignal.common.OneSignalWrapper;
-import com.onesignal.inAppMessages.IInAppMessage;
 import com.onesignal.inAppMessages.IInAppMessageClickListener;
 import com.onesignal.inAppMessages.IInAppMessageClickEvent;
-import com.onesignal.inAppMessages.IInAppMessageClickResult;
 import com.onesignal.inAppMessages.IInAppMessageLifecycleListener;
 import com.onesignal.inAppMessages.IInAppMessageWillDisplayEvent;
 import com.onesignal.inAppMessages.IInAppMessageDidDisplayEvent;
@@ -70,11 +66,11 @@ import com.onesignal.notifications.INotificationClickEvent;
 import com.onesignal.notifications.INotificationLifecycleListener;
 import com.onesignal.notifications.INotificationWillDisplayEvent;
 import com.onesignal.notifications.IPermissionObserver;
+import com.onesignal.notifications.internal.badges.impl.shortcutbadger.ShortcutBadgeException;
+import com.onesignal.notifications.internal.badges.impl.shortcutbadger.ShortcutBadger;
 import com.onesignal.user.subscriptions.IPushSubscription;
 import com.onesignal.user.subscriptions.IPushSubscriptionObserver;
-import com.onesignal.user.subscriptions.PushSubscriptionState;
 import com.onesignal.user.subscriptions.PushSubscriptionChangedState;
-import com.onesignal.user.state.UserState;
 import com.onesignal.user.state.UserChangedState;
 import com.onesignal.user.state.IUserStateObserver;
 import org.json.JSONException;
@@ -87,7 +83,7 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements
         IPermissionObserver,
         IUserStateObserver,
         LifecycleEventListener,
-        INotificationLifecycleListener{
+        INotificationLifecycleListener {
     private ReactApplicationContext mReactApplicationContext;
     private ReactContext mReactContext;
 
@@ -726,6 +722,15 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements
         if (hasSetUserStateObserver) {
             OneSignal.getUser().removeObserver(this);
             hasSetUserStateObserver = false;
+        }
+    }
+
+    @ReactMethod
+    public void setBadgeCount(int count) {
+        try {
+            ShortcutBadger.applyCountOrThrow(mReactApplicationContext, count);
+        } catch (ShortcutBadgeException e) {
+            Log.e("OneSignal", "setBadgeCount");
         }
     }
 
